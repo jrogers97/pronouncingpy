@@ -13,6 +13,22 @@ pronunciations = None
 lookup = None
 rhyme_lookup = None
 
+# judgement call whether these sounds are the same!
+custom_phone_groups = [
+  ['OY0', 'OY1', 'OY2'],
+  ['AY0', 'AY1', 'AY2'],
+  ['ER0', 'ER1', 'ER2'],
+  ['EH0', 'EH1', 'EH2'],
+  ['EY0', 'EY1', 'EY2'],
+  ['IH0', 'IH1', 'IH2'],
+  ['OW0', 'OW1', 'OW2'],
+  ['IY0', 'IY1', 'IY2'],
+  ['UW0', 'UW1', 'UW2'],
+  ['UH0', 'UH1', 'UH2'],
+  ['AH1', 'AH2'],
+  ['AH0'],
+  ['AA0', 'AA1', 'AA2', 'AO0', 'AO1', 'AO2'],
+]
 
 def parse_cmu(cmufh):
     """Parses an incoming file handle as a CMU pronouncing dictionary file.
@@ -130,7 +146,23 @@ def stresses_for_word(find):
     """
     phone_lists = phones_for_word(find)
     return list(map(stresses, phone_lists))
+    
+def replace_dup_phone(phone):
+    # remove dollar sign if phone is part of a regex
+    has_dollar_sign = phone[-1] == '$'
+    cleaned_phone = phone.replace("$", "")
+    
+    # replace phone with the index of its group, -1 if it's not in any
+    group_idx = next((i for i in range(0, len(custom_phone_groups)) if phone in custom_phone_groups[i]), -1)
+    if group_idx == -1:
+        return phone
+    
+    # add back dollar sign if we removed it
+    return str(group_idx) + ('$' if has_dollar_sign else '')
 
+def relax_phones(str):
+    # replace phones with an index based on groups of similar vowel sounds, leading to a more relaxed definition of a rhyme
+    return " ".join([replace_dup_phone(i) for i in str.split(" ")])
 
 def rhyming_part(phones):
     """Get the "rhyming part" of a string with CMUdict phones.
@@ -151,8 +183,8 @@ def rhyming_part(phones):
     phones_list = phones.split()
     for i in range(len(phones_list) - 1, 0, -1):
         if phones_list[i][-1] in '12':
-            return ' '.join(phones_list[i:])
-    return phones
+            return relax_phones(' '.join(phones_list[i:]))
+    return relax_phones(phones)
 
 
 def search(pattern):

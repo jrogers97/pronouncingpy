@@ -41,11 +41,11 @@ ADOLESCENT(1)  AE2 D OW0 L EH1 S AH0 N T
 
     def test_rhyming_part(self):
         part = pronouncing.rhyming_part("S L IY1 P ER0")
-        self.assertEqual(part, "IY1 P ER0")
+        self.assertEqual(part, "7 P 2")
         part = pronouncing.rhyming_part("S L IY1 P AH0 L IY0")
-        self.assertEqual(part, "IY1 P AH0 L IY0")
+        self.assertEqual(part, "7 P 11 L 7")
         part = pronouncing.rhyming_part("M ER0 M AE0 N S K")
-        self.assertEqual(part, "M ER0 M AE0 N S K")
+        self.assertEqual(part, "M 2 M AE0 N S K")
 
     def test_search(self):
         matches = pronouncing.search('^S K L')
@@ -112,7 +112,11 @@ ADOLESCENT(1)  AE2 D OW0 L EH1 S AH0 N T
         self.assertEqual(
             words,
             ['dideoxycytidine', 'homosexuality', 'hypersensitivity'])
-
+            
+    def test_relaxed_rhymes(self):
+        rhymes = pronouncing.rhymes('weight')
+        self.assertTrue('underweight' in rhymes)
+        
     def test_a(self):
         words = pronouncing.phones_for_word('a')
         self.assertEqual(words, ['AH0', 'EY1'])
